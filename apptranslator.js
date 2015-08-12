@@ -17,9 +17,10 @@ function AppTranslator(translatableElementIdentifier)
     return this;
 }
 
-AppTranslator.prototype.loadSourceFromJSON = function(url)
+AppTranslator.prototype.loadSourceFromJSON = function(url, callback)
 {
     var self = this;
+    self.translationSourceLoaded = false; // Should this be set to false?
     
     $.getJSON(url, function(data)
     {
@@ -58,16 +59,45 @@ AppTranslator.prototype.loadSourceFromJSON = function(url)
                 self.translationMeta.availableLanguagesCount = Object.keys(data.meta.availableLanguages).length;
             }
             
+            self.translationSource = data.translations;
+            self.translationSourceLoaded = true;
             
+            callback.call(self);
         }
         else
         {
+            self.translationSourceLoaded = false;
             throw new Error('JSON cannot be null and / or it must include meta and data objects');   
-        }
-        console.log(data);
-        
+        }     
     }).fail(function()
     {
+        self.translationSourceLoaded = false;
         throw new Error('Failed to load translation source from JSON');
+    });
+}
+
+AppTranslator.prototype.translateApp = function(language)
+{
+    var self = this;
+    
+    if(!self.translationSourceLoaded)
+    {
+        throw new Error('Could not translate, translation source is not loaded!');
+        return;
+    }
+    
+    $('*').each(function(index, value)
+    {
+        var $this = $(this);
+        
+        if(typeof $this.data(self.identifier) === 'undefined' ||
+           !$this.data(self.identifier) ||
+           $.isEmptyObject($this.data(self.identifier)))
+        {
+            console.log('Skipped ' + $this[0].tagName);
+            return;   
+        }
+        
+        console.log($this.data(self.identifier));
     });
 }

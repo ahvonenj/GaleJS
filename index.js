@@ -3,5 +3,5 @@ var translator;
 $(document).ready(function()
 {
     translator = new AppTranslator();
-    translator.loadSourceFromJSON('translations.json');
+    translator.loadSourceFromJSON('translations.json', translator.translateApp);
 });
