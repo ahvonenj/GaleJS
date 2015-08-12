@@ -1,0 +1,66 @@
+{
+    "meta":
+    {
+        "test": "Working",
+        "availableLanguages":
+        {
+            "finnish":
+            {
+                "shorthand": "fi"   
+            },
+            "english":
+            {
+                "shorthand": "en"   
+            },
+            "swedish":
+            {
+                "shorthand": "swe"   
+            }
+        }
+    },
+    
+    "translations":
+    {
+        "fi":
+        {
+            "page_main_header": "Pääotsikko",
+            "page_header_subtext": "Pääotsikon alateksti",
+            "test_translation_c": "Kolmas testi",
+            "test_translation_d": "Neljäs testi",
+            "test_translation_e": "Viides testi",
+            "test_translation_f": "Kuudes testi",
+            "test_translation_g": "Seitsemäs testi",
+            "test_translation_h": "Kahdeksas testi",
+            "test_translation_i": "Yhdeksäs testi",
+            "test_translation_j": "Kymmenes testi"
+        },
+        
+        "en":
+        {
+            "page_main_header": "Main header",
+            "page_header_subtext": "Subtext of main header",
+            "test_translation_c": "Third test",
+            "test_translation_d": "Fourth test",
+            "test_translation_e": "Fifth test",
+            "test_translation_f": "Sixth test",
+            "test_translation_g": "Seventh test",
+            "test_translation_h": "Eighth test",
+            "test_translation_i": "Ninth test",
+            "test_translation_j": "Tenth test"
+        },
+        
+        "swe":
+        {
+            "page_main_header": "Sidhuvud",
+            "page_header_subtext": "Undertext av sidhuvud",
+            "test_translation_c": "Third test",
+            "test_translation_d": "Fourth test",
+            "test_translation_e": "Fifth test",
+            "test_translation_f": "Sixth test",
+            "test_translation_g": "Seventh test",
+            "test_translation_h": "Eighth test",
+            "test_translation_i": "Ninth test",
+            "test_translation_j": "Tenth test"
+        }
+    }
+}
