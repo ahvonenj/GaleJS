@@ -89,7 +89,16 @@ AppTranslator.prototype.translateApp = function(language)
     var isShorthand = null;
     
     
-    self._figureSuppliedLanguage(language);
+    if(self._figureSuppliedLanguage(language) == 'normal')
+    {
+        console.log('Normal: ' + language);
+        console.log('Short: ' + self._normalToShorthand(language));
+    }
+    else if(self._figureSuppliedLanguage(language) == 'shorthand')
+    {
+        console.log('Short: ' + language);
+        console.log('normal: ' + self._shorthandToNormal(language));
+    }
     
     
     $('*').each(function(index, value)
@@ -154,4 +163,26 @@ AppTranslator.prototype._figureSuppliedLanguage = function(language)
     }
     
     return suppliedLanguage;
+}
+
+AppTranslator.prototype._normalToShorthand = function(normal)
+{
+    var self = this;
+    
+    return self.availableLanguages[normal].shorthand || null; 
+}
+
+AppTranslator.prototype._shorthandToNormal = function(shorthand)
+{
+    var self = this;
+    
+    for(var key in self.availableLanguages)
+    {
+        if(self.availableLanguages[key].shorthand == shorthand)
+        {
+            return key;
+        }
+    }
+    
+    return null;
 }
