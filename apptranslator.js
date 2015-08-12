@@ -86,6 +86,12 @@ AppTranslator.prototype.translateApp = function(language)
         return;
     }
     
+    var isShorthand = null;
+    
+    
+    self._figureSuppliedLanguage(language);
+    
+    
     $('*').each(function(index, value)
     {
         var $this = $(this);
@@ -98,6 +104,54 @@ AppTranslator.prototype.translateApp = function(language)
             return;   
         }
         
+        
+        
         console.log($this.data(self.identifier));
     });
+}
+
+AppTranslator.prototype._figureSuppliedLanguage = function(language)
+{
+    var self = this;
+    
+    
+    var suppliedLanguage = null;
+    var tmpLanguages = [];
+    
+    for(var key in self.translationSource)
+    {
+        tmpLanguages.push(key);   
+    }
+    
+    if(Array.isArray(self.availableLanguages))
+    {
+        for(var i = 0; i < self.availableLanguages.length; i++)
+        {
+            if(self.availableLanguages[i] == language)
+            {
+                suppliedLanguage = 'other'; // Other, but working so continue
+            }
+        }
+    }
+    else
+    {
+        for(var key in self.availableLanguages)
+        {
+            if(key == language)
+            {
+                suppliedLanguage = 'normal'; // Normal, long format
+            }
+            else if(self.availableLanguages[key].shorthand == language)
+            {
+                suppliedLanguage = 'shorthand'; // Shorthand
+            }
+        }
+    }
+    
+    if(!suppliedLanguage)
+    {
+        throw new Error('Could not figure supplied \'TO-language\'');
+    }
+    
+    return suppliedLanguage;
 }
