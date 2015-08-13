@@ -1,3 +1,10 @@
+// GaleJS
+// https://github.com/ahvonenj/GaleJS
+// Jonah Ahvonen
+
+;(function()
+{
+
 function Gale(translatableElementIdentifier)
 {
     this.identifier = translatableElementIdentifier || 'translateid';
@@ -482,3 +489,21 @@ Gale.prototype._inElementCache = function(element)
     
     return false;
 }
+
+
+if (typeof module !== "undefined" && module.exports) // Node: Export function
+{
+    module.exports = Gale;
+}
+
+else if (typeof define === 'function' && define.amd) // AMD/requirejs: Define the module
+{
+    define(function () {return Gale;});
+}
+
+else // Browser: Expose to window
+{
+    window.Gale = Gale;
+}
+
+}());
