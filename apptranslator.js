@@ -1,4 +1,4 @@
-function AppTranslator(translatableElementIdentifier)
+function Gale(translatableElementIdentifier)
 {
     this.identifier = translatableElementIdentifier || 'translateid';
     
@@ -26,7 +26,7 @@ function AppTranslator(translatableElementIdentifier)
     return this;
 }
 
-AppTranslator.prototype.loadSourceFromJSON = function(url, callback)
+Gale.prototype.loadSourceFromJSON = function(url, callback)
 {
     var self = this;
     self.translationSourceLoaded = false; // Should this be set to false?
@@ -85,7 +85,7 @@ AppTranslator.prototype.loadSourceFromJSON = function(url, callback)
     });
 }
 
-AppTranslator.prototype.translateApp = function(language, cacheonly)
+Gale.prototype.translateApp = function(language, cacheonly)
 {
     var self = this;
     var finalIndexFormat = null;
@@ -220,7 +220,7 @@ AppTranslator.prototype.translateApp = function(language, cacheonly)
     }
 }
 
-AppTranslator.prototype._figureSuppliedLanguage = function(language)
+Gale.prototype._figureSuppliedLanguage = function(language)
 {
     var self = this;
     
@@ -266,7 +266,7 @@ AppTranslator.prototype._figureSuppliedLanguage = function(language)
     return suppliedLanguage;
 }
 
-AppTranslator.prototype._translateElement = function(element, sourceIndex)
+Gale.prototype._translateElement = function(element, sourceIndex)
 {
     var self = this;
     var $element = element;
@@ -289,7 +289,7 @@ AppTranslator.prototype._translateElement = function(element, sourceIndex)
     
 }
 
-AppTranslator.prototype._figureTranslationIndexType = function()
+Gale.prototype._figureTranslationIndexType = function()
 {
     var self = this;
     
@@ -330,14 +330,14 @@ AppTranslator.prototype._figureTranslationIndexType = function()
     }
 }
 
-AppTranslator.prototype._normalToShorthand = function(normal)
+Gale.prototype._normalToShorthand = function(normal)
 {
     var self = this;
     
     return self.availableLanguages[normal].shorthand || null; 
 }
 
-AppTranslator.prototype._shorthandToNormal = function(shorthand)
+Gale.prototype._shorthandToNormal = function(shorthand)
 {
     var self = this;
     
@@ -352,7 +352,7 @@ AppTranslator.prototype._shorthandToNormal = function(shorthand)
     return null;
 }
 
-AppTranslator.prototype._inElementCache = function(element)
+Gale.prototype._inElementCache = function(element)
 {
     var self = this;
     
