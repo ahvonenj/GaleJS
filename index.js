@@ -7,6 +7,7 @@ $(document).ready(function()
     gale.loadSourceFromJSON('translations.json', function()
     { 
         gale.translateApp('english');
+        gale.reverseTranslationLookup('This is second translated content text');
     });
     
     $('.translate_button').on('click', function()

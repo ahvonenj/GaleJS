@@ -299,8 +299,12 @@ Gale.prototype.reverseTranslationLookup = function(text)
             {
                 foundKey = key2;
                 found = true;
+                break;
             }
         }
+        
+        if(found)
+            break;
     }
                           
     if(found)
