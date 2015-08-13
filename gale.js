@@ -284,7 +284,11 @@ Gale.prototype._translateElement = function(element, sourceIndex)
         if(self.debug)
             console.log('Translated element = TEXT INPUT');
         
-        $element.val(source[$element.data(self.identifier)]);
+        $element.attr('placeholder', source[$element.data(self.identifier)]);
+    }
+    else
+    {
+        $element.html(source[$element.data(self.identifier)]);
     }
     
 }
