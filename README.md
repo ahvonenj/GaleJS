@@ -1,5 +1,3 @@
-# GaleJS
-
 ![](https://github.com/ahvonenj/GaleJS/blob/master/gale_logo_small.png?raw=true)
 
 Second coming of the unpopular Apptranslator Version 1!
