@@ -6,7 +6,7 @@ Second coming of the unpopular Apptranslator Version 1!
 
 There is no decent lightweight client-side translation library made for hybrid mobile applications for example. [i18next](http://i18next.com/) exists, but it is overkill for simple applications.
 
-## Features
+## What?
 
 - Simple and fast application translation
 - Translations are stored as a JSON file
@@ -15,6 +15,83 @@ There is no decent lightweight client-side translation library made for hybrid m
 - Reverse-lookup translations by text
 - Data-attribute based translation id-system (means clean HTML and makes runtime attribute modifications possible)
 - No heavy, extra localization features - only pure text translations
+
+## How?
+
+### Define to-be-translated elements in HTML
+
+```
+<h1 data-translateid = "page_main_header">Placeholder header</h1>
+<p data-translateid = "page_header_subtext">Placeholder header subtext</p>
+<h2 class = "left-aligned post_header" data-translateid = "post_first_header">Placeholder first subheader</h2>
+```
+
+### Create translations.json file which looks something like this
+
+```
+{
+    "meta":
+    {
+        "availableLanguages":
+        {
+            "finnish":
+            {
+                "shorthand": "fi"   
+            },
+            "english":
+            {
+                "shorthand": "en"   
+            },
+            "swedish":
+            {
+                "shorthand": "swe"   
+            }
+        }
+    },
+    
+    "translations":
+    {
+        "fi":
+        {
+            "page_main_header": "Pääotsikko",
+            "page_header_subtext": "Pääotsikon alateksti",
+            "post_first_header": "Ensimmäinen alaotsikko"
+        },
+        
+        "en":
+        {
+            "page_main_header": "Main header",
+            "page_header_subtext": "Subtext of main header",
+            "post_first_header": "First subheader"
+        },
+        
+        "swe":
+        {
+            "page_main_header": "Sidhuvud",
+            "page_header_subtext": "Undertext av sidhuvud",
+            "post_first_header": "Första delhuvudet"
+        }
+    }
+}
+```
+
+### Include gale.js and jquery
+
+```
+<script src="jquery-1.11.3.min.js"></script>
+<script src="gale.js"></script>
+```
+
+### Create new Gale-object and load the translation source into it + make GaleJS translate the application after the source is loaded
+
+```
+var gale = new Gale();
+
+gale.loadSourceFromJSON('translations.json', function()
+{ 
+    gale.translateApp('english'); 
+});
+```
 
 ## Demo
 
