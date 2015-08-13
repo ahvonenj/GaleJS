@@ -20,6 +20,9 @@ function AppTranslator(translatableElementIdentifier)
     
     this.debug = true;
     
+    this.isSourceIndexTypeFigured = false;
+    this.sourceIndexType = null;
+    
     return this;
 }
 
@@ -85,26 +88,51 @@ AppTranslator.prototype.loadSourceFromJSON = function(url, callback)
 AppTranslator.prototype.translateApp = function(language, cacheonly)
 {
     var self = this;
+    var finalIndexFormat = null;
     
     if(!self.translationSourceLoaded)
     {
         throw new Error('Could not translate, translation source is not loaded!');
         return;
     }
-    
-    var isShorthand = null;
-    
-    
-    if(self._figureSuppliedLanguage(language) == 'normal')
+     
+    // Yuck, sorry for this code block
+    if(self._figureTranslationIndexType() === 'normal')
     {
-        console.log('Normal: ' + language);
-        console.log('Short: ' + self._normalToShorthand(language));
+        if(self._figureSuppliedLanguage(language) == 'normal')
+        {
+            finalIndexFormat = language;   
+        }
+        else if(self._figureSuppliedLanguage(language) == 'shorthand')
+        {
+            finalIndexFormat = self._shorthandToNormal(language);
+        }
+        else
+        {
+            throw new Error('Something is wrong with supplied language and / or translation source indexes!');   
+        }
     }
-    else if(self._figureSuppliedLanguage(language) == 'shorthand')
+    else if(self._figureTranslationIndexType() === 'shorthand')
     {
-        console.log('Short: ' + language);
-        console.log('normal: ' + self._shorthandToNormal(language));
+        if(self._figureSuppliedLanguage(language) == 'normal')
+        {
+            finalIndexFormat = self._normalToShorthand(language);   
+        }
+        else if(self._figureSuppliedLanguage(language) == 'shorthand')
+        {
+            finalIndexFormat = language;
+        }
+        else
+        {
+            throw new Error('Something is wrong with supplied language and / or translation source indexes!');   
+        }
     }
+    else
+    {
+        throw new Error('Something is wrong with supplied language and / or translation source indexes!');   
+    }
+    
+    console.log('Translation index type smart detect successful (finalIndexFormat = ' + finalIndexFormat + ')');
     
     if(cacheonly && self.elementCache.length > 0)
     {
@@ -165,6 +193,9 @@ AppTranslator.prototype.translateApp = function(language, cacheonly)
                     self.elementCache.push($this);   
                 }
             }
+            
+            // Other = Does not matter, self.translationSource[language] will work
+            // Normal = 
 
 
             console.log($this.data(self.identifier));
@@ -221,6 +252,47 @@ AppTranslator.prototype._figureSuppliedLanguage = function(language)
     }
     
     return suppliedLanguage;
+}
+
+AppTranslator.prototype._figureTranslationIndexType = function()
+{
+    var self = this;
+    
+    if(!self.isSourceIndexTypeFigured || !self.sourceIndexType)
+    {
+        var keysTotal = Object.keys(self.translationSource).length;
+        var keySum = 0;
+        var keyAvg = 0;
+
+        for(var key in self.translationSource)   
+        {
+            keySum += key.length;
+        }
+        
+        if(self.debug)
+        {
+            console.log('Total: ' + keysTotal);
+            console.log('Sum: ' + keySum);
+            console.log('Avg: ' + Math.ceil(keySum / keysTotal));
+        }
+        
+        if(Math.ceil(keySum / keysTotal) > 4)
+        {
+            self.sourceIndexType = 'normal';   
+        }
+        else
+        {
+            self.sourceIndexType = 'shorthand';   
+        }
+        
+        self.isSourceIndexTypeFigured = true;
+        
+        return self.sourceIndexType;
+    }
+    else
+    {
+        return self.sourceIndexType;
+    }
 }
 
 AppTranslator.prototype._normalToShorthand = function(normal)
