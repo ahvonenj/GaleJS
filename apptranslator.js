@@ -107,6 +107,10 @@ AppTranslator.prototype.translateApp = function(language, cacheonly)
         {
             finalIndexFormat = self._shorthandToNormal(language);
         }
+        else if(self._figureSuppliedLanguage(language) == 'other')
+        {
+            finalIndexFormat = language;
+        }
         else
         {
             throw new Error('Something is wrong with supplied language and / or translation source indexes!');   
@@ -122,9 +126,13 @@ AppTranslator.prototype.translateApp = function(language, cacheonly)
         {
             finalIndexFormat = language;
         }
+        else if(self._figureSuppliedLanguage(language) == 'other')
+        {
+            finalIndexFormat = language; 
+        }
         else
         {
-            throw new Error('Something is wrong with supplied language and / or translation source indexes!');   
+            
         }
     }
     else
@@ -156,6 +164,10 @@ AppTranslator.prototype.translateApp = function(language, cacheonly)
                 console.log('Skipped ' + $this[0].tagName);
                 return;   
             }
+            
+            // Actual translation happens here
+            self._translateElement($this, finalIndexFormat);
+            
             
             console.log($this.data(self.identifier));
         }
@@ -194,8 +206,8 @@ AppTranslator.prototype.translateApp = function(language, cacheonly)
                 }
             }
             
-            // Other = Does not matter, self.translationSource[language] will work
-            // Normal = 
+            // Actual translation happens here
+            self._translateElement($this, finalIndexFormat);
 
 
             console.log($this.data(self.identifier));
@@ -252,6 +264,29 @@ AppTranslator.prototype._figureSuppliedLanguage = function(language)
     }
     
     return suppliedLanguage;
+}
+
+AppTranslator.prototype._translateElement = function(element, sourceIndex)
+{
+    var self = this;
+    var $element = element;
+    var source = self.translationSource[sourceIndex];
+    
+    if($element.is('input[type="button"], input[type="submit"]')) // Detect if element is button of some sort
+    {
+        if(self.debug)
+            console.log('Translated element = BUTTON INPUT');
+        
+        $element.attr('value', source[$element.data(self.identifier)]);
+    }
+    else if($element.is('input[type="text"], input[type="password"], input[type="textarea"], input[type="textbox"]')) // Detect if element is textbox of some sort
+    {
+        if(self.debug)
+            console.log('Translated element = TEXT INPUT');
+        
+        $element.val(source[$element.data(self.identifier)]);
+    }
+    
 }
 
 AppTranslator.prototype._figureTranslationIndexType = function()
