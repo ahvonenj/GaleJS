@@ -75,9 +75,13 @@
             
             <h2 class = "left-aligned post_header">Demo controls</h2>
             <div id = "controls">
-                <input type = "button" value = "Translate to finnish" onclick = "gale.translateApp('finnish', true)"/>
-                <input type = "button" value = "Translate to english" onclick = "gale.translateApp('english', true)"/>
-                <input type = "button" value = "Translate to swedish" onclick = "gale.translateApp('swedish', true)"/>
+                <input type = "button" class = "translate_button" value = "Translate to finnish" data-translateto = "finnish"/>
+                <input type = "button" class = "translate_button" value = "Translate to english" data-translateto = "english"/>
+                <input type = "button" class = "translate_button" value = "Translate to swedish" data-translateto = "swedish"/>
+                
+                <br/><br/>
+                
+                <p>Use cache: <input type = "checkbox" id = "from_cache"/></p>
             </div>
         </div>
     </body>

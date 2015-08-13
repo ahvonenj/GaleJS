@@ -145,7 +145,7 @@ Gale.prototype.translateApp = function(language, cacheonly)
     if(cacheonly && self.elementCache.length > 0)
     {
         console.log('Translating cached elements (translateFromCache = ' + 
-                    self.translateFromCache + '; elementCacheLength = ' + 
+                    cacheonly + '; elementCacheLength = ' + 
                     self.elementCache.length + ')');
         
         if(self.debug) 
@@ -182,7 +182,7 @@ Gale.prototype.translateApp = function(language, cacheonly)
     }
     else
     {
-        console.log('Translating and caching noncached elements (caching = ' + self.caching + ')');
+        console.log('Translating and caching noncached elements (caching = ' + cacheonly + ')');
         
         if(self.debug) 
         { 
