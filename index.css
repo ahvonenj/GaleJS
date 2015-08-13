@@ -77,3 +77,14 @@ body
 {
     padding: 5px 10px 5px 10px;
 }
+
+#controls
+{
+    margin-top: 10px;
+    text-align: left;
+}
+
+#controls input[type="button"]
+{
+    padding: 5px 10px 5px 10px;
+}
