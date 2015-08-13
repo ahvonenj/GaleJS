@@ -39,7 +39,8 @@
             "td-listheader-span": "Listan otsikko",
             "td-li-1": "Listan kohta 1",
             "td-li-2": "Listan kohta 2",
-            "td-li-3": "Listan kohta 3"
+            "td-li-3": "Listan kohta 3",
+            "stresstest": "Stressitesti!"
         },
         
         "en":
@@ -60,7 +61,8 @@
             "td-listheader-span": "List header",
             "td-li-1": "List item 1",
             "td-li-2": "List item 2",
-            "td-li-3": "List item 3"
+            "td-li-3": "List item 3",
+            "stresstest": "A stress test!"
         },
         
         "swe":
@@ -81,7 +83,8 @@
             "td-listheader-span": "Listhuvudet",
             "td-li-1": "Listobjekt 1",
             "td-li-2": "Listobjekt 2",
-            "td-li-3": "Listobjekt 3"
+            "td-li-3": "Listobjekt 3",
+            "stresstest": "Stresstest (Is this even swedish?)"
         }
     }
 }
