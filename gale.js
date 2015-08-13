@@ -246,6 +246,84 @@ Gale.prototype.translateApp = function(language, cacheonly)
     }
 }
 
+Gale.prototype.getTranslationsById = function(id)
+{
+    var self = this;
+    var available = self.availableLanguages;
+    var indexType = self._figureTranslationIndexType();
+    var ret = {};
+    
+    for(var key in self.translationSource)
+    {     
+        var top = self.translationSource[key];
+        
+        for(var key2 in top)
+        {
+            var val = top[key2];
+            
+            if(key2 === id)
+            {
+                ret[key] = val;
+            }
+        }
+    }
+    
+    return ret;
+}
+
+Gale.prototype.reverseTranslationLookup = function(text)
+{
+    var self = this;
+    var ret = {};
+    var found = false;
+    var foundKey = null;
+    
+    for(var key in self.translationSource)
+    {
+        var top = self.translationSource[key];   
+        
+        for(var key2 in top)
+        {
+            var val = top[key2];
+                          
+            if(val === text)
+            {
+                foundKey = key2;
+                found = true;
+            }
+        }
+    }
+                          
+    if(found)
+    {
+        for(var key in self.translationSource)
+        {     
+            var top = self.translationSource[key];
+
+            for(var key2 in top)
+            {
+                var val = top[key2];
+
+                if(key2 === foundKey)
+                {
+                    ret[key] = val;
+                }
+            }
+        }
+        
+        return ret;
+    }
+    else
+    {
+        return {};   
+    }
+}
+
+/*****************************************************************************
+** PRIVATE / UTILITY
+*****************************************************************************/
+
+
 Gale.prototype._figureSuppliedLanguage = function(language)
 {
     var self = this;
@@ -358,31 +436,6 @@ Gale.prototype._figureTranslationIndexType = function()
     {
         return self.sourceIndexType;
     }
-}
-
-Gale.prototype.getTranslationsById = function(id)
-{
-    var self = this;
-    var available = self.availableLanguages;
-    var indexType = self._figureTranslationIndexType();
-    var ret = {};
-    
-    for(var key in self.translationSource)
-    {     
-        var top = self.translationSource[key];
-        
-        for(var key2 in top)
-        {
-            var val = top[key2];
-            
-            if(key2 === id)
-            {
-                ret[key] = val;
-            }
-        }
-    }
-    
-    return ret;
 }
 
 Gale.prototype._normalToShorthand = function(normal)

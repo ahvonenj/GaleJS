@@ -7,5 +7,6 @@ $(document).ready(function()
     { 
         gale.translateApp('english'); 
         console.log(gale.getTranslationsById('post_first_content'));
+        console.log(gale.reverseTranslationLookup('Third subheader'));
     });
 });
