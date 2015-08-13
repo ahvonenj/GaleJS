@@ -2,6 +2,6 @@ var translator;
 
 $(document).ready(function()
 {
-    translator = new AppTranslator();
+    translator = new Gale();
     translator.loadSourceFromJSON('translations.json', function() { translator.translateApp('english'); });
 });
