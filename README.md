@@ -1,4 +1,4 @@
-# Apptranslator
+# GaleJS
 
 Second coming of the unpopular Apptranslator Version 1!
 
