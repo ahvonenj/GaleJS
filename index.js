@@ -1,7 +1,11 @@
-var translator;
+var gale;
 
 $(document).ready(function()
 {
-    translator = new Gale();
-    translator.loadSourceFromJSON('translations.json', function() { translator.translateApp('english'); });
+    gale = new Gale();
+    gale.loadSourceFromJSON('translations.json', function()
+    { 
+        gale.translateApp('english'); 
+        console.log(gale.getTranslationsById('post_first_content'));
+    });
 });
