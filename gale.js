@@ -145,7 +145,7 @@ Gale.prototype.translateApp = function(language, cacheonly)
     if(cacheonly && self.elementCache.length > 0)
     {
         console.log('Translating cached elements (translateFromCache = ' + 
-                    self.translateFromCache + '; elementCacheLength = ' + 
+                    cacheonly + '; elementCacheLength = ' + 
                     self.elementCache.length + ')');
         
         if(self.debug) 
@@ -161,15 +161,16 @@ Gale.prototype.translateApp = function(language, cacheonly)
                !$this.data(self.identifier) ||
                $.isEmptyObject($this.data(self.identifier)))
             {
-                console.log('Skipped ' + $this[0].tagName);
+                if(self.debug)
+                    console.log('Skipped ' + $this[0].tagName);
                 return;   
             }
             
             // Actual translation happens here
             self._translateElement($this, finalIndexFormat);
             
-            
-            console.log($this.data(self.identifier));
+            if(self.debug)
+                console.log($this.data(self.identifier));
         }
         
         if(self.debug) 
@@ -181,7 +182,7 @@ Gale.prototype.translateApp = function(language, cacheonly)
     }
     else
     {
-        console.log('Translating noncached elements (caching = ' + self.caching + ')');
+        console.log('Translating and caching noncached elements (caching = ' + cacheonly + ')');
         
         if(self.debug) 
         { 
@@ -196,7 +197,8 @@ Gale.prototype.translateApp = function(language, cacheonly)
                !$this.data(self.identifier) ||
                $.isEmptyObject($this.data(self.identifier)))
             {
-                console.log('Skipped ' + $this[0].tagName);
+                if(self.debug)
+                    console.log('Skipped ' + $this[0].tagName);
                 return;   
             }
 
@@ -211,8 +213,8 @@ Gale.prototype.translateApp = function(language, cacheonly)
             // Actual translation happens here
             self._translateElement($this, finalIndexFormat);
 
-
-            console.log($this.data(self.identifier));
+            if(self.debug)
+                console.log($this.data(self.identifier));
         });
         
         if(self.debug) 
@@ -375,6 +377,12 @@ Gale.prototype._translateElement = function(element, sourceIndex)
     var self = this;
     var $element = element;
     var source = self.translationSource[sourceIndex];
+    
+    if(typeof source[$element.data(self.identifier)] === 'undefined' ||
+       !source[$element.data(self.identifier)])
+    {
+        console.log('\'' + sourceIndex  + '\' Translation not found for id \'' + $element.data(self.identifier) + '\'');
+    }
     
     if($element.is('input[type="button"], input[type="submit"]')) // Detect if element is button of some sort
     {
