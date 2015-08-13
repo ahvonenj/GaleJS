@@ -82,7 +82,9 @@ There is no decent lightweight client-side translation library made for hybrid m
 <script src="gale.js"></script>
 ```
 
-### Create new Gale-object and load the translation source into it + make GaleJS translate the application after the source is loaded
+### Create new Gale-object and load the translation source into it
+
+Here we also have a callback specified. Gale will translate the application in english after it has loaded the source.
 
 ```
 var gale = new Gale();
