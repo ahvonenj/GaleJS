@@ -88,3 +88,20 @@ body
 {
     padding: 5px 10px 5px 10px;
 }
+
+#example_table
+{
+    border-collapse: collapse;
+}
+
+#example_table td
+{
+    border: 1px solid rgb(200, 200, 200); 
+    padding: 10px;
+}
+
+#example_table ul
+{
+    padding-left: 30px;
+}
+

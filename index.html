@@ -37,13 +37,47 @@
                 <input type = "button" data-translateid = "button_input" value = "Placeholder send" />
             </form>
             
+            <h2 class = "left-aligned post_header">Header which won't get translated</h2>
+            <table id = "example_table">
+                <tr>
+                    <td data-translateid = "td">
+                        Just a cell
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div data-translateid = "td-div">
+                            Div in cell
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span data-translateid = "td-span">Span in cell</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span data-translateid = "td-listheader-span">List in cell</span>
+                        
+                        <br/><br/>
+                        
+                        <ul>
+                            <li data-translateid = "td-li-1">List item 1</li>
+                            <li data-translateid = "td-li-2">List item 2</li>
+                            <li data-translateid = "td-li-3">List item 3</li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+            
             <br/><br/>
             
             <h2 class = "left-aligned post_header">Demo controls</h2>
             <div id = "controls">
-                <input type = "button" value = "Translate to finnish" onclick = "translator.translateApp('finnish', true)"/>
-                <input type = "button" value = "Translate to english" onclick = "translator.translateApp('english', true)"/>
-                <input type = "button" value = "Translate to swedish" onclick = "translator.translateApp('swedish', true)"/>
+                <input type = "button" value = "Translate to finnish" onclick = "gale.translateApp('finnish', true)"/>
+                <input type = "button" value = "Translate to english" onclick = "gale.translateApp('english', true)"/>
+                <input type = "button" value = "Translate to swedish" onclick = "gale.translateApp('swedish', true)"/>
             </div>
         </div>
     </body>

@@ -4,7 +4,6 @@ function Gale(translatableElementIdentifier)
     
     this.previousLanguage = null;
     this.currentLanguage = null;
-    this.nextLanguage = null;
     
     this.translationSourceLoaded = false;
     
@@ -89,6 +88,7 @@ Gale.prototype.translateApp = function(language, cacheonly)
 {
     var self = this;
     var finalIndexFormat = null;
+    var wasTranslated = false;
     
     if(!self.translationSourceLoaded)
     {
@@ -176,6 +176,8 @@ Gale.prototype.translateApp = function(language, cacheonly)
         { 
             console.timeEnd('Cached element translate time'); 
         }
+        
+        wasTranslated = true;
     }
     else
     {
@@ -217,8 +219,110 @@ Gale.prototype.translateApp = function(language, cacheonly)
         { 
             console.timeEnd('Noncached element translate time'); 
         }
+        
+        wasTranslated = true;
+    }
+    
+    if(wasTranslated)
+    {
+        if(self.previousLanguage)
+        {
+            self.previousLanguage = self.currentLanguage;
+        }
+
+        if(self._figureSuppliedLanguage(language) === 'shorthand')
+        {
+            self.currentLanguage = self._shorthandToNormal(language);               
+        }
+        else
+        {
+            self.currentLanguage = language;
+        }
+
+        if(!self.previousLanguage)
+        {
+            self.previousLanguage = self.currentLanguage;
+        }
     }
 }
+
+Gale.prototype.getTranslationsById = function(id)
+{
+    var self = this;
+    var available = self.availableLanguages;
+    var indexType = self._figureTranslationIndexType();
+    var ret = {};
+    
+    for(var key in self.translationSource)
+    {     
+        var top = self.translationSource[key];
+        
+        for(var key2 in top)
+        {
+            var val = top[key2];
+            
+            if(key2 === id)
+            {
+                ret[key] = val;
+            }
+        }
+    }
+    
+    return ret;
+}
+
+Gale.prototype.reverseTranslationLookup = function(text)
+{
+    var self = this;
+    var ret = {};
+    var found = false;
+    var foundKey = null;
+    
+    for(var key in self.translationSource)
+    {
+        var top = self.translationSource[key];   
+        
+        for(var key2 in top)
+        {
+            var val = top[key2];
+                          
+            if(val === text)
+            {
+                foundKey = key2;
+                found = true;
+            }
+        }
+    }
+                          
+    if(found)
+    {
+        for(var key in self.translationSource)
+        {     
+            var top = self.translationSource[key];
+
+            for(var key2 in top)
+            {
+                var val = top[key2];
+
+                if(key2 === foundKey)
+                {
+                    ret[key] = val;
+                }
+            }
+        }
+        
+        return ret;
+    }
+    else
+    {
+        return {};   
+    }
+}
+
+/*****************************************************************************
+** PRIVATE / UTILITY
+*****************************************************************************/
+
 
 Gale.prototype._figureSuppliedLanguage = function(language)
 {

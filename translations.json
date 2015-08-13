@@ -32,7 +32,14 @@
             "post_third_header": "Kolmas alaotsikko",
             "login_input": "Käyttäjänimi",
             "password_input": "Salasana",
-            "button_input": "Lähetä"
+            "button_input": "Lähetä",
+            "td": "Taulukon solu",
+            "td-div": "Div solun sisällä",
+            "td-span": "Span solun sisällä",
+            "td-listheader-span": "Listan otsikko",
+            "td-li-1": "Listan kohta 1",
+            "td-li-2": "Listan kohta 2",
+            "td-li-3": "Listan kohta 3"
         },
         
         "en":
@@ -46,7 +53,14 @@
             "post_third_header": "Third subheader",
             "login_input": "Username",
             "password_input": "Password",
-            "button_input": "Send"
+            "button_input": "Send",
+            "td": "A cell",
+            "td-div": "A div in cell",
+            "td-span": "A span in cell",
+            "td-listheader-span": "List header",
+            "td-li-1": "List item 1",
+            "td-li-2": "List item 2",
+            "td-li-3": "List item 3"
         },
         
         "swe":
@@ -60,7 +74,14 @@
             "post_third_header": "Tredje delhuvudet",
             "login_input": "Användarnamn",
             "password_input": "Lösenord",
-            "button_input": "Skicka"
+            "button_input": "Skicka",
+            "td": "Cell",
+            "td-div": "Div i en cell",
+            "td-span": "Span i en cell",
+            "td-listheader-span": "Listhuvudet",
+            "td-li-1": "Listobjekt 1",
+            "td-li-2": "Listobjekt 2",
+            "td-li-3": "Listobjekt 3"
         }
     }
 }
