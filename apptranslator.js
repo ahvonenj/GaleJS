@@ -14,6 +14,12 @@ function AppTranslator(translatableElementIdentifier)
     
     this.availableLanguages = null;
     
+    this.caching = true;
+    this.elementCache = [];
+    this.translateFromCache = true;
+    
+    this.debug = true;
+    
     return this;
 }
 
@@ -76,7 +82,7 @@ AppTranslator.prototype.loadSourceFromJSON = function(url, callback)
     });
 }
 
-AppTranslator.prototype.translateApp = function(language)
+AppTranslator.prototype.translateApp = function(language, cacheonly)
 {
     var self = this;
     
@@ -100,23 +106,75 @@ AppTranslator.prototype.translateApp = function(language)
         console.log('normal: ' + self._shorthandToNormal(language));
     }
     
-    
-    $('*').each(function(index, value)
+    if(cacheonly && self.elementCache.length > 0)
     {
-        var $this = $(this);
+        console.log('Translating cached elements (translateFromCache = ' + 
+                    self.translateFromCache + '; elementCacheLength = ' + 
+                    self.elementCache.length + ')');
         
-        if(typeof $this.data(self.identifier) === 'undefined' ||
-           !$this.data(self.identifier) ||
-           $.isEmptyObject($this.data(self.identifier)))
-        {
-            console.log('Skipped ' + $this[0].tagName);
-            return;   
+        if(self.debug) 
+        { 
+            console.time('Cached element translate time'); 
         }
         
+        for(var key in self.elementCache)
+        {
+            var $this = self.elementCache[key];   
+            
+            if(typeof $this.data(self.identifier) === 'undefined' ||
+               !$this.data(self.identifier) ||
+               $.isEmptyObject($this.data(self.identifier)))
+            {
+                console.log('Skipped ' + $this[0].tagName);
+                return;   
+            }
+            
+            console.log($this.data(self.identifier));
+        }
         
+        if(self.debug) 
+        { 
+            console.timeEnd('Cached element translate time'); 
+        }
+    }
+    else
+    {
+        console.log('Translating noncached elements (caching = ' + self.caching + ')');
         
-        console.log($this.data(self.identifier));
-    });
+        if(self.debug) 
+        { 
+            console.time('Noncached element translate time'); 
+        }
+        
+        $('*').each(function(index, value)
+        {
+            var $this = $(this);
+
+            if(typeof $this.data(self.identifier) === 'undefined' ||
+               !$this.data(self.identifier) ||
+               $.isEmptyObject($this.data(self.identifier)))
+            {
+                console.log('Skipped ' + $this[0].tagName);
+                return;   
+            }
+
+            if(self.caching)
+            {
+                if(!self._inElementCache($this))
+                {
+                    self.elementCache.push($this);   
+                }
+            }
+
+
+            console.log($this.data(self.identifier));
+        });
+        
+        if(self.debug) 
+        { 
+            console.timeEnd('Noncached element translate time'); 
+        }
+    }
 }
 
 AppTranslator.prototype._figureSuppliedLanguage = function(language)
@@ -185,4 +243,19 @@ AppTranslator.prototype._shorthandToNormal = function(shorthand)
     }
     
     return null;
+}
+
+AppTranslator.prototype._inElementCache = function(element)
+{
+    var self = this;
+    
+    for(var key in self.elementCache)
+    {
+        if(self.elementCache[key].is(element))
+        {
+            return true;   
+        }
+    }
+    
+    return false;
 }
