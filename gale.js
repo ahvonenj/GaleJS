@@ -27,9 +27,6 @@ function Gale(translatableElementIdentifier)
     
     this.debug = true;
     
-    this.isSourceIndexTypeFigured = false;
-    this.sourceIndexType = null;
-    
     return this;
 }
 
@@ -47,29 +44,11 @@ Gale.prototype.loadSourceFromJSON = function(url, callback)
             
             if(!data.meta.availableLanguages)
             {
-                console.log('Meta \'availableLanguages\' not found for JSON translation source, trying to parse directly from translations object');
-                
-                var availLanguages = [];
-
-                for(var key in data.translations)
-                {
-                    availLanguages.push(key);   
-                }
-                
-                if(availLanguages.length > 0)
-                {
-                    console.log('Parsing successful, but without availableLanguages-meta, availableLanguages will not be as exclusive');
-                    self.availableLanguages = availLanguages;
-                    self.translationMeta.availableLanguagesCount = availLanguages.length;
-                }
-                else
-                {
-                    console.log('Parsing failed. Is translations object empty or incorrectly structured'); 
-                }
+                throw new Error('Meta \'availableLanguages\' not found for JSON translation source!');
             }
             else
             {
-                console.log('Meta \'availableLanguages\' found for JSON translation source, skipping translation object language parsing');   
+                console.log('Meta \'availableLanguages\' found for JSON translation source');   
                 
                 self.availableLanguages = data.meta.availableLanguages;
                 self.translationMeta.availableLanguagesCount = Object.keys(data.meta.availableLanguages).length;
@@ -96,7 +75,6 @@ Gale.prototype.loadSourceFromJSON = function(url, callback)
 Gale.prototype.translateApp = function(language, cacheonly)
 {
     var self = this;
-    var finalIndexFormat = null;
     var wasTranslated = false;
     
     if(!self.translationSourceLoaded)
@@ -104,52 +82,12 @@ Gale.prototype.translateApp = function(language, cacheonly)
         throw new Error('Could not translate, translation source is not loaded!');
         return;
     }
-     
-    // Yuck, sorry for this code block
-    if(self._figureTranslationIndexType() === 'normal')
-    {
-        if(self._figureSuppliedLanguage(language) == 'normal')
-        {
-            finalIndexFormat = language;   
-        }
-        else if(self._figureSuppliedLanguage(language) == 'shorthand')
-        {
-            finalIndexFormat = self._shorthandToNormal(language);
-        }
-        else if(self._figureSuppliedLanguage(language) == 'other')
-        {
-            finalIndexFormat = language;
-        }
-        else
-        {
-            throw new Error('Something is wrong with supplied language and / or translation source indexes!');   
-        }
-    }
-    else if(self._figureTranslationIndexType() === 'shorthand')
-    {
-        if(self._figureSuppliedLanguage(language) == 'normal')
-        {
-            finalIndexFormat = self._normalToShorthand(language);   
-        }
-        else if(self._figureSuppliedLanguage(language) == 'shorthand')
-        {
-            finalIndexFormat = language;
-        }
-        else if(self._figureSuppliedLanguage(language) == 'other')
-        {
-            finalIndexFormat = language; 
-        }
-        else
-        {
-            
-        }
-    }
-    else
-    {
-        throw new Error('Something is wrong with supplied language and / or translation source indexes!');   
-    }
     
-    console.log('Translation index type smart detect successful (finalIndexFormat = ' + finalIndexFormat + ')');
+    if(Object.keys(self.translationSource).indexOf(language) === -1)
+    {
+        throw new Error('Could not translate, supplied language not found in source');
+        return;
+    }
     
     if(cacheonly && self.elementCache.length > 0)
     {
@@ -176,7 +114,7 @@ Gale.prototype.translateApp = function(language, cacheonly)
             }
             
             // Actual translation happens here
-            self._translateElement($this, finalIndexFormat);
+            self._translateElement($this, language);
             
             if(self.debug)
                 console.log($this.data(self.identifier));
@@ -220,7 +158,7 @@ Gale.prototype.translateApp = function(language, cacheonly)
             }
             
             // Actual translation happens here
-            self._translateElement($this, finalIndexFormat);
+            self._translateElement($this, language);
 
             if(self.debug)
                 console.log($this.data(self.identifier));
@@ -241,14 +179,7 @@ Gale.prototype.translateApp = function(language, cacheonly)
             self.previousLanguage = self.currentLanguage;
         }
 
-        if(self._figureSuppliedLanguage(language) === 'shorthand')
-        {
-            self.currentLanguage = self._shorthandToNormal(language);               
-        }
-        else
-        {
-            self.currentLanguage = language;
-        }
+        self.currentLanguage = language;
 
         if(!self.previousLanguage)
         {
@@ -260,8 +191,6 @@ Gale.prototype.translateApp = function(language, cacheonly)
 Gale.prototype.getTranslationsById = function(id)
 {
     var self = this;
-    var available = self.availableLanguages;
-    var indexType = self._figureTranslationIndexType();
     var ret = {};
     
     for(var key in self.translationSource)
@@ -339,62 +268,16 @@ Gale.prototype.reverseTranslationLookup = function(text)
 *****************************************************************************/
 
 
-Gale.prototype._figureSuppliedLanguage = function(language)
-{
-    var self = this;
-    
-    
-    var suppliedLanguage = null;
-    var tmpLanguages = [];
-    
-    for(var key in self.translationSource)
-    {
-        tmpLanguages.push(key);   
-    }
-    
-    if(Array.isArray(self.availableLanguages))
-    {
-        for(var i = 0; i < self.availableLanguages.length; i++)
-        {
-            if(self.availableLanguages[i] == language)
-            {
-                suppliedLanguage = 'other'; // Other, but working so continue
-            }
-        }
-    }
-    else
-    {
-        for(var key in self.availableLanguages)
-        {
-            if(key == language)
-            {
-                suppliedLanguage = 'normal'; // Normal, long format
-            }
-            else if(self.availableLanguages[key].shorthand == language)
-            {
-                suppliedLanguage = 'shorthand'; // Shorthand
-            }
-        }
-    }
-    
-    if(!suppliedLanguage)
-    {
-        throw new Error('Could not figure supplied \'TO-language\'');
-    }
-    
-    return suppliedLanguage;
-}
-
-Gale.prototype._translateElement = function(element, sourceIndex)
+Gale.prototype._translateElement = function(element, language)
 {
     var self = this;
     var $element = element;
-    var source = self.translationSource[sourceIndex];
+    var source = self.translationSource[language];
     
     if(typeof source[$element.data(self.identifier)] === 'undefined' ||
        !source[$element.data(self.identifier)])
     {
-        console.log('\'' + sourceIndex  + '\' Translation not found for id \'' + $element.data(self.identifier) + '\'');
+        console.log('\'' + language  + '\' Translation not found for id \'' + $element.data(self.identifier) + '\'');
     }
     
     if($element.is('input[type="button"], input[type="submit"]')) // Detect if element is button of some sort
@@ -416,69 +299,6 @@ Gale.prototype._translateElement = function(element, sourceIndex)
         $element.html(source[$element.data(self.identifier)]);
     }
     
-}
-
-Gale.prototype._figureTranslationIndexType = function()
-{
-    var self = this;
-    
-    if(!self.isSourceIndexTypeFigured || !self.sourceIndexType)
-    {
-        var keysTotal = Object.keys(self.translationSource).length;
-        var keySum = 0;
-        var keyAvg = 0;
-
-        for(var key in self.translationSource)   
-        {
-            keySum += key.length;
-        }
-        
-        if(self.debug)
-        {
-            console.log('Total: ' + keysTotal);
-            console.log('Sum: ' + keySum);
-            console.log('Avg: ' + Math.ceil(keySum / keysTotal));
-        }
-        
-        if(Math.ceil(keySum / keysTotal) > 4)
-        {
-            self.sourceIndexType = 'normal';   
-        }
-        else
-        {
-            self.sourceIndexType = 'shorthand';   
-        }
-        
-        self.isSourceIndexTypeFigured = true;
-        
-        return self.sourceIndexType;
-    }
-    else
-    {
-        return self.sourceIndexType;
-    }
-}
-
-Gale.prototype._normalToShorthand = function(normal)
-{
-    var self = this;
-    
-    return self.availableLanguages[normal].shorthand || null; 
-}
-
-Gale.prototype._shorthandToNormal = function(shorthand)
-{
-    var self = this;
-    
-    for(var key in self.availableLanguages)
-    {
-        if(self.availableLanguages[key].shorthand == shorthand)
-        {
-            return key;
-        }
-    }
-    
-    return null;
 }
 
 Gale.prototype._inElementCache = function(element)
