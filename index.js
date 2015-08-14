@@ -8,6 +8,7 @@ $(document).ready(function()
     { 
         gale.translateApp('english');
         gale.reverseTranslationLookup('This is second translated content text');
+        console.log(gale._invertSource());
     });
     
     $('.translate_button').on('click', function()

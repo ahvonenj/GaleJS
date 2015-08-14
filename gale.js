@@ -16,6 +16,7 @@ function Gale(translatableElementIdentifier)
     
     this.translationRawSource = null;
     this.translationSource = null;
+    this.inverseTranslationSource = null;
     this.translationMeta = null;
     
     this.availableLanguages = null;
@@ -75,6 +76,7 @@ Gale.prototype.loadSourceFromJSON = function(url, callback)
             }
             
             self.translationSource = data.translations;
+            self.inverseTranslationSource = self._invertSource();
             self.translationSourceLoaded = true;
             
             callback.call(self);
@@ -492,6 +494,27 @@ Gale.prototype._inElementCache = function(element)
     }
     
     return false;
+}
+
+Gale.prototype._invertSource = function()
+{
+    var self = this;
+    var invertedSource = {};
+    
+    for(var key in self.translationSource)
+    {
+        var top = self.translationSource[key];
+        invertedSource[key] = {};
+        
+        var iTop = invertedSource[key];
+        
+        for(var key2 in top)
+        {
+            iTop[top[key2]] = key2;
+        }
+    }
+    
+    return invertedSource;
 }
 
 
