@@ -193,6 +193,12 @@ Gale.prototype.getTranslationsById = function(id)
     var self = this;
     var ret = {};
     
+    if(!self.translationSourceLoaded)
+    {
+        throw new Error('Could not get translation by id, translation source not loaded');   
+        return;
+    }
+    
     for(var key in self.translationSource)
     {     
         var top = self.translationSource[key];
@@ -217,6 +223,12 @@ Gale.prototype.reverseTranslationLookup = function(text)
     var ret = {};
     var found = false;
     var foundKey = null;
+    
+    if(!self.translationSourceLoaded)
+    {
+        throw new Error('Could not perform reverse translation lookup, translation source not loaded');   
+        return;
+    }   
     
     for(var key in self.translationSource)
     {
