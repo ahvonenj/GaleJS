@@ -7,7 +7,7 @@
 
 function Gale(translatableElementIdentifier)
 {
-    this.identifier = translatableElementIdentifier || 'translateid';
+    this.identifier = translatableElementIdentifier || 'data-translateid';
     
     this.previousLanguage = null;
     this.currentLanguage = null;
@@ -26,6 +26,7 @@ function Gale(translatableElementIdentifier)
     this.translateFromCache = true;
     
     this.debug = true;
+    this.deepDebug = false;
     
     return this;
 }
@@ -46,6 +47,7 @@ Gale.prototype.translateApp = function(language, cacheonly)
 {
     var self = this;
     var wasTranslated = false;
+    cacheonly = cacheonly || true;
     
     if(!self.translationSourceLoaded)
     {
@@ -61,7 +63,8 @@ Gale.prototype.translateApp = function(language, cacheonly)
     
     if(cacheonly && self.elementCache.length > 0)
     {
-        console.log('Translating cached elements (translateFromCache = ' + 
+        if(self.debug)
+            console.log('Translating cached elements (translateFromCache = ' + 
                     cacheonly + '; elementCacheLength = ' + 
                     self.elementCache.length + ')');
         
@@ -72,22 +75,21 @@ Gale.prototype.translateApp = function(language, cacheonly)
         
         for(var key in self.elementCache)
         {
-            var $this = self.elementCache[key];   
+            var element = self.elementCache[key];   
+            var edata = element.getAttribute(self.identifier);
             
-            if(typeof $this.data(self.identifier) === 'undefined' ||
-               !$this.data(self.identifier) ||
-               $.isEmptyObject($this.data(self.identifier)))
+            if(typeof edata === 'undefined' || !edata)
             {
-                if(self.debug)
-                    console.log('Skipped ' + $this[0].tagName);
+                if(self.deepDebug)
+                    console.log('Skipped ' + element.tagName);
                 return;   
             }
             
             // Actual translation happens here
-            self._translateElement($this, language);
+            self._translateElement(element, language);
             
-            if(self.debug)
-                console.log($this.data(self.identifier));
+            if(self.deepDebug)
+                console.log(edata);
         }
         
         if(self.debug) 
@@ -99,40 +101,45 @@ Gale.prototype.translateApp = function(language, cacheonly)
     }
     else
     {
-        console.log('Translating and caching noncached elements (caching = ' + cacheonly + ')');
+        if(self.debug)
+            console.log('Translating and caching noncached elements (caching = ' + self.caching + ')');
         
         if(self.debug) 
         { 
             console.time('Noncached element translate time'); 
         }
         
-        $('*').each(function(index, value)
+        var elements = document.getElementsByTagName("*");
+        
+        for(var key in elements)
         {
-            var $this = $(this);
-
-            if(typeof $this.data(self.identifier) === 'undefined' ||
-               !$this.data(self.identifier) ||
-               $.isEmptyObject($this.data(self.identifier)))
+            var element = elements[key];
+            
+            if(element.nodeType !== 1)
+                continue;
+            
+            var edata = element.getAttribute(self.identifier);
+            
+            if(typeof edata === 'undefined' || !edata)
             {
-                if(self.debug)
-                    console.log('Skipped ' + $this[0].tagName);
-                return;   
+                if(self.deepDebug)
+                    console.log('Skipped ' + element.tagName);
+                continue;  
             }
-
+            
             if(self.caching)
             {
-                if(!self._inElementCache($this))
+                if(!self._inElementCache(element))
                 {
-                    self.elementCache.push($this);   
+                    self.elementCache.push(element);   
                 }
             }
             
-            // Actual translation happens here
-            self._translateElement($this, language);
+            self._translateElement(element, language);
 
-            if(self.debug)
-                console.log($this.data(self.identifier));
-        });
+            if(self.deepDebug)
+                console.log(edata);
+        }
         
         if(self.debug) 
         { 
@@ -259,12 +266,10 @@ Gale.prototype._processSource = function(source, callback)
     {
         if(typeof source === 'object')
         {
-            console.log('obbbjj');
             self._processSourceCallback(source, callback);
         }
         else if(typeof source === 'string')
         {
-            console.log('jason');
             $.getJSON(source, function(returndata)
             {
                 self._processSourceCallback(returndata, callback);
@@ -298,7 +303,8 @@ Gale.prototype._processSourceCallback = function(data, callback)
         }
         else
         {
-            console.log('Meta \'availableLanguages\' found for translation source');   
+            if(self.debug)
+                console.log('Meta \'availableLanguages\' found for translation source');   
 
             self.availableLanguages = data.meta.availableLanguages;
             self.translationMeta.availableLanguagesCount = Object.keys(data.meta.availableLanguages).length;
@@ -321,34 +327,45 @@ Gale.prototype._processSourceCallback = function(data, callback)
 Gale.prototype._translateElement = function(element, language)
 {
     var self = this;
-    var $element = element;
     var source = self.translationSource[language];
+    var edata = element.getAttribute(self.identifier);
     
-    if(typeof source[$element.data(self.identifier)] === 'undefined' ||
-       !source[$element.data(self.identifier)])
+    if(typeof source[edata] === 'undefined' || !source[edata])
     {
-        console.log('\'' + language  + '\' Translation not found for id \'' + $element.data(self.identifier) + '\'');
+        console.log('\'' + language  + '\' Translation not found for id \'' + edata + '\'');
     }
     
-    if($element.is('input[type="button"], input[type="submit"]')) // Detect if element is button of some sort
+    if(element.nodeName === 'INPUT') // Detect if element is button of some sort
     {
-        if(self.debug)
-            console.log('Translated element = BUTTON INPUT');
+        if(element.type == 'button' || element.type == 'submit')
+        {
+            if(self.deepDebug)
+                console.log('Translated element = BUTTON INPUT');
         
-        $element.attr('value', source[$element.data(self.identifier)]);
-    }
-    else if($element.is('input[type="text"], input[type="password"], input[type="textarea"], input[type="textbox"]')) // Detect if element is textbox of some sort
-    {
-        if(self.debug)
-            console.log('Translated element = TEXT INPUT');
+            element.setAttribute('value', source[edata]);
+        }
+        else if(element.type == 'text' || element.type == 'password' || element.type == 'textarea' || element.type == 'textbox')
+        {
+            if(self.deepDebug)
+                console.log('Translated element = TEXT INPUT');
         
-        $element.attr('placeholder', source[$element.data(self.identifier)]);
+            element.setAttribute('placeholder', source[edata]);
+        }
+        else
+        {
+            if(self.deepDebug)
+                console.log('Translated element = NORMAL');
+            
+            element.innerHTML = source[edata];
+        }
     }
     else
     {
-        $element.html(source[$element.data(self.identifier)]);
+        if(self.deepDebug)
+                console.log('Translated element = NORMAL');
+        
+        element.innerHTML = source[edata];
     }
-    
 }
 
 Gale.prototype._inElementCache = function(element)
@@ -357,7 +374,7 @@ Gale.prototype._inElementCache = function(element)
     
     for(var key in self.elementCache)
     {
-        if(self.elementCache[key].is(element))
+        if(self.elementCache[key] == element)
         {
             return true;   
         }
