@@ -33,43 +33,13 @@ function Gale(translatableElementIdentifier)
 Gale.prototype.loadSourceFromJSON = function(url, callback)
 {
     var self = this;
-    self.translationSourceLoaded = false; // Should this be set to false?
-    
-    $.getJSON(url, function(data)
-    {
-        if(data && data.meta && data.translations)
-        {
-            self.translationRawSource = data;
-            self.translationMeta = data.meta;
-            
-            if(!data.meta.availableLanguages)
-            {
-                throw new Error('Meta \'availableLanguages\' not found for JSON translation source!');
-            }
-            else
-            {
-                console.log('Meta \'availableLanguages\' found for JSON translation source');   
-                
-                self.availableLanguages = data.meta.availableLanguages;
-                self.translationMeta.availableLanguagesCount = Object.keys(data.meta.availableLanguages).length;
-            }
-            
-            self.translationSource = data.translations;
-            self.inverseTranslationSource = self._invertSource();
-            self.translationSourceLoaded = true;
-            
-            callback.call(self);
-        }
-        else
-        {
-            self.translationSourceLoaded = false;
-            throw new Error('JSON cannot be null and / or it must include meta and data objects');   
-        }     
-    }).fail(function()
-    {
-        self.translationSourceLoaded = false;
-        throw new Error('Failed to load translation source from JSON');
-    });
+    self._processSource(url, callback);
+}
+
+Gale.prototype.loadSourceFromObject = function(object, callback)
+{
+    var self = this;
+    self._processSource(object, callback);
 }
 
 Gale.prototype.translateApp = function(language, cacheonly)
@@ -278,6 +248,74 @@ Gale.prototype.reverseTranslationLookup = function(text)
 /*****************************************************************************
 ** PRIVATE / UTILITY
 *****************************************************************************/
+
+
+Gale.prototype._processSource = function(source, callback)
+{
+    var self = this;
+    self.translationSourceLoaded = false;
+    
+    if(source !== null)
+    {
+        if(typeof source === 'object')
+        {
+            console.log('obbbjj');
+            self._processSourceCallback(source, callback);
+        }
+        else if(typeof source === 'string')
+        {
+            console.log('jason');
+            $.getJSON(source, function(returndata)
+            {
+                self._processSourceCallback(returndata, callback);
+            }).fail(function()
+            {
+                self.translationSourceLoaded = false;
+                throw new Error('Failed to load translation source from JSON');
+            });
+        }
+        else
+        {
+            throw new Error('Could not determine translation source type');   
+        }
+        
+             
+    }
+}
+
+Gale.prototype._processSourceCallback = function(data, callback)
+{
+    var self = this;
+    
+    if(data && data.meta && data.translations)
+    {
+        self.translationRawSource = data;
+        self.translationMeta = data.meta;
+
+        if(!data.meta.availableLanguages)
+        {
+            throw new Error('Meta \'availableLanguages\' not found in translation source!');
+        }
+        else
+        {
+            console.log('Meta \'availableLanguages\' found for translation source');   
+
+            self.availableLanguages = data.meta.availableLanguages;
+            self.translationMeta.availableLanguagesCount = Object.keys(data.meta.availableLanguages).length;
+        }
+
+        self.translationSource = data.translations;
+        self.inverseTranslationSource = self._invertSource();
+        self.translationSourceLoaded = true;
+
+        callback.call(self);
+    }
+    else
+    {
+        self.translationSourceLoaded = false;
+        throw new Error('Translation source cannot be null and / or it must include meta and data objects');   
+    }
+}
 
 
 Gale.prototype._translateElement = function(element, language)
