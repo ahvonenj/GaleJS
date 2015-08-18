@@ -16,6 +16,10 @@ There is no decent lightweight client-side translation library made for hybrid m
 - Data-attribute based translation id system (means clean HTML and makes runtime attribute modifications possible)
 - No heavy, extra localization features - only pure text translations
 
+As of 18.8.2015 GaleJS is jQuery free!
+
+![](https://github.com/ahvonenj/GaleJS/blob/strict-language-source/no_jquery.png?raw=true)
+
 ## How?
 
 [See here](https://github.com/ahvonenj/GaleJS/wiki/How-to-use-GaleJS)
