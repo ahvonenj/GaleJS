@@ -1,6 +1,13 @@
+// GaleJS
+// https://github.com/ahvonenj/GaleJS
+// Jonah Ahvonen
+
+;(function()
+{
+
 function Gale(translatableElementIdentifier)
 {
-    this.identifier = translatableElementIdentifier || 'translateid';
+    this.identifier = translatableElementIdentifier || 'data-translateid';
     
     this.previousLanguage = null;
     this.currentLanguage = null;
@@ -9,6 +16,7 @@ function Gale(translatableElementIdentifier)
     
     this.translationRawSource = null;
     this.translationSource = null;
+    this.inverseTranslationSource = null;
     this.translationMeta = null;
     
     this.availableLanguages = null;
@@ -18,9 +26,7 @@ function Gale(translatableElementIdentifier)
     this.translateFromCache = true;
     
     this.debug = true;
-    
-    this.isSourceIndexTypeFigured = false;
-    this.sourceIndexType = null;
+    this.deepDebug = false;
     
     return this;
 }
@@ -28,123 +34,39 @@ function Gale(translatableElementIdentifier)
 Gale.prototype.loadSourceFromJSON = function(url, callback)
 {
     var self = this;
-    self.translationSourceLoaded = false; // Should this be set to false?
-    
-    $.getJSON(url, function(data)
-    {
-        if(data && data.meta && data.translations)
-        {
-            self.translationRawSource = data;
-            self.translationMeta = data.meta;
-            
-            if(!data.meta.availableLanguages)
-            {
-                console.log('Meta \'availableLanguages\' not found for JSON translation source, trying to parse directly from translations object');
-                
-                var availLanguages = [];
+    self._processSource(url, callback);
+}
 
-                for(var key in data.translations)
-                {
-                    availLanguages.push(key);   
-                }
-                
-                if(availLanguages.length > 0)
-                {
-                    console.log('Parsing successful, but without availableLanguages-meta, availableLanguages will not be as exclusive');
-                    self.availableLanguages = availLanguages;
-                    self.translationMeta.availableLanguagesCount = availLanguages.length;
-                }
-                else
-                {
-                    console.log('Parsing failed. Is translations object empty or incorrectly structured'); 
-                }
-            }
-            else
-            {
-                console.log('Meta \'availableLanguages\' found for JSON translation source, skipping translation object language parsing');   
-                
-                self.availableLanguages = data.meta.availableLanguages;
-                self.translationMeta.availableLanguagesCount = Object.keys(data.meta.availableLanguages).length;
-            }
-            
-            self.translationSource = data.translations;
-            self.translationSourceLoaded = true;
-            
-            callback.call(self);
-        }
-        else
-        {
-            self.translationSourceLoaded = false;
-            throw new Error('JSON cannot be null and / or it must include meta and data objects');   
-        }     
-    }).fail(function()
-    {
-        self.translationSourceLoaded = false;
-        throw new Error('Failed to load translation source from JSON');
-    });
+Gale.prototype.loadSourceFromObject = function(object, callback)
+{
+    var self = this;
+    self._processSource(object, callback);
 }
 
 Gale.prototype.translateApp = function(language, cacheonly)
 {
     var self = this;
-    var finalIndexFormat = null;
     var wasTranslated = false;
+    
+    if(typeof cacheonly === 'undefined')
+        var cacheonly = true;
     
     if(!self.translationSourceLoaded)
     {
         throw new Error('Could not translate, translation source is not loaded!');
         return;
     }
-     
-    // Yuck, sorry for this code block
-    if(self._figureTranslationIndexType() === 'normal')
-    {
-        if(self._figureSuppliedLanguage(language) == 'normal')
-        {
-            finalIndexFormat = language;   
-        }
-        else if(self._figureSuppliedLanguage(language) == 'shorthand')
-        {
-            finalIndexFormat = self._shorthandToNormal(language);
-        }
-        else if(self._figureSuppliedLanguage(language) == 'other')
-        {
-            finalIndexFormat = language;
-        }
-        else
-        {
-            throw new Error('Something is wrong with supplied language and / or translation source indexes!');   
-        }
-    }
-    else if(self._figureTranslationIndexType() === 'shorthand')
-    {
-        if(self._figureSuppliedLanguage(language) == 'normal')
-        {
-            finalIndexFormat = self._normalToShorthand(language);   
-        }
-        else if(self._figureSuppliedLanguage(language) == 'shorthand')
-        {
-            finalIndexFormat = language;
-        }
-        else if(self._figureSuppliedLanguage(language) == 'other')
-        {
-            finalIndexFormat = language; 
-        }
-        else
-        {
-            
-        }
-    }
-    else
-    {
-        throw new Error('Something is wrong with supplied language and / or translation source indexes!');   
-    }
     
-    console.log('Translation index type smart detect successful (finalIndexFormat = ' + finalIndexFormat + ')');
+    if(Object.keys(self.translationSource).indexOf(language) === -1)
+    {
+        throw new Error('Could not translate, supplied language not found in source');
+        return;
+    }
     
     if(cacheonly && self.elementCache.length > 0)
     {
-        console.log('Translating cached elements (translateFromCache = ' + 
+        if(self.debug)
+            console.log('Translating cached elements (translateFromCache = ' + 
                     cacheonly + '; elementCacheLength = ' + 
                     self.elementCache.length + ')');
         
@@ -155,22 +77,21 @@ Gale.prototype.translateApp = function(language, cacheonly)
         
         for(var key in self.elementCache)
         {
-            var $this = self.elementCache[key];   
+            var element = self.elementCache[key];   
+            var edata = element.getAttribute(self.identifier);
             
-            if(typeof $this.data(self.identifier) === 'undefined' ||
-               !$this.data(self.identifier) ||
-               $.isEmptyObject($this.data(self.identifier)))
+            if(typeof edata === 'undefined' || !edata)
             {
-                if(self.debug)
-                    console.log('Skipped ' + $this[0].tagName);
+                if(self.deepDebug)
+                    console.log('Skipped ' + element.tagName);
                 return;   
             }
             
             // Actual translation happens here
-            self._translateElement($this, finalIndexFormat);
+            self._translateElement(element, language);
             
-            if(self.debug)
-                console.log($this.data(self.identifier));
+            if(self.deepDebug)
+                console.log(edata);
         }
         
         if(self.debug) 
@@ -182,40 +103,45 @@ Gale.prototype.translateApp = function(language, cacheonly)
     }
     else
     {
-        console.log('Translating and caching noncached elements (caching = ' + cacheonly + ')');
+        if(self.debug)
+            console.log('Translating and caching noncached elements (caching = ' + self.caching + ')');
         
         if(self.debug) 
         { 
             console.time('Noncached element translate time'); 
         }
         
-        $('*').each(function(index, value)
+        var elements = document.getElementsByTagName("*");
+        
+        for(var key in elements)
         {
-            var $this = $(this);
-
-            if(typeof $this.data(self.identifier) === 'undefined' ||
-               !$this.data(self.identifier) ||
-               $.isEmptyObject($this.data(self.identifier)))
+            var element = elements[key];
+            
+            if(element.nodeType !== 1)
+                continue;
+            
+            var edata = element.getAttribute(self.identifier);
+            
+            if(typeof edata === 'undefined' || !edata)
             {
-                if(self.debug)
-                    console.log('Skipped ' + $this[0].tagName);
-                return;   
+                if(self.deepDebug)
+                    console.log('Skipped ' + element.tagName);
+                continue;  
             }
-
+            
             if(self.caching)
             {
-                if(!self._inElementCache($this))
+                if(!self._inElementCache(element))
                 {
-                    self.elementCache.push($this);   
+                    self.elementCache.push(element);   
                 }
             }
             
-            // Actual translation happens here
-            self._translateElement($this, finalIndexFormat);
+            self._translateElement(element, language);
 
-            if(self.debug)
-                console.log($this.data(self.identifier));
-        });
+            if(self.deepDebug)
+                console.log(edata);
+        }
         
         if(self.debug) 
         { 
@@ -232,14 +158,7 @@ Gale.prototype.translateApp = function(language, cacheonly)
             self.previousLanguage = self.currentLanguage;
         }
 
-        if(self._figureSuppliedLanguage(language) === 'shorthand')
-        {
-            self.currentLanguage = self._shorthandToNormal(language);               
-        }
-        else
-        {
-            self.currentLanguage = language;
-        }
+        self.currentLanguage = language;
 
         if(!self.previousLanguage)
         {
@@ -251,9 +170,13 @@ Gale.prototype.translateApp = function(language, cacheonly)
 Gale.prototype.getTranslationsById = function(id)
 {
     var self = this;
-    var available = self.availableLanguages;
-    var indexType = self._figureTranslationIndexType();
     var ret = {};
+    
+    if(!self.translationSourceLoaded)
+    {
+        throw new Error('Could not get translation by id, translation source not loaded');   
+        return;
+    }
     
     for(var key in self.translationSource)
     {     
@@ -280,6 +203,12 @@ Gale.prototype.reverseTranslationLookup = function(text)
     var found = false;
     var foundKey = null;
     
+    if(!self.translationSourceLoaded)
+    {
+        throw new Error('Could not perform reverse translation lookup, translation source not loaded');   
+        return;
+    }   
+    
     for(var key in self.translationSource)
     {
         var top = self.translationSource[key];   
@@ -292,8 +221,12 @@ Gale.prototype.reverseTranslationLookup = function(text)
             {
                 foundKey = key2;
                 found = true;
+                break;
             }
         }
+        
+        if(found)
+            break;
     }
                           
     if(found)
@@ -326,146 +259,116 @@ Gale.prototype.reverseTranslationLookup = function(text)
 *****************************************************************************/
 
 
-Gale.prototype._figureSuppliedLanguage = function(language)
+Gale.prototype._processSource = function(source, callback)
 {
     var self = this;
+    self.translationSourceLoaded = false;
     
-    
-    var suppliedLanguage = null;
-    var tmpLanguages = [];
-    
-    for(var key in self.translationSource)
+    if(source !== null)
     {
-        tmpLanguages.push(key);   
-    }
-    
-    if(Array.isArray(self.availableLanguages))
-    {
-        for(var i = 0; i < self.availableLanguages.length; i++)
+        if(typeof source === 'object')
         {
-            if(self.availableLanguages[i] == language)
+            self._processSourceCallback(source, callback);
+        }
+        else if(typeof source === 'string')
+        {
+            self._getJSON(source).then(function(returndata)
             {
-                suppliedLanguage = 'other'; // Other, but working so continue
-            }
-        }
-    }
-    else
-    {
-        for(var key in self.availableLanguages)
-        {
-            if(key == language)
+                self._processSourceCallback(returndata, callback);
+            },
+            function(status)
             {
-                suppliedLanguage = 'normal'; // Normal, long format
-            }
-            else if(self.availableLanguages[key].shorthand == language)
-            {
-                suppliedLanguage = 'shorthand'; // Shorthand
-            }
-        }
-    }
-    
-    if(!suppliedLanguage)
-    {
-        throw new Error('Could not figure supplied \'TO-language\'');
-    }
-    
-    return suppliedLanguage;
-}
-
-Gale.prototype._translateElement = function(element, sourceIndex)
-{
-    var self = this;
-    var $element = element;
-    var source = self.translationSource[sourceIndex];
-    
-    if(typeof source[$element.data(self.identifier)] === 'undefined' ||
-       !source[$element.data(self.identifier)])
-    {
-        console.log('\'' + sourceIndex  + '\' Translation not found for id \'' + $element.data(self.identifier) + '\'');
-    }
-    
-    if($element.is('input[type="button"], input[type="submit"]')) // Detect if element is button of some sort
-    {
-        if(self.debug)
-            console.log('Translated element = BUTTON INPUT');
-        
-        $element.attr('value', source[$element.data(self.identifier)]);
-    }
-    else if($element.is('input[type="text"], input[type="password"], input[type="textarea"], input[type="textbox"]')) // Detect if element is textbox of some sort
-    {
-        if(self.debug)
-            console.log('Translated element = TEXT INPUT');
-        
-        $element.attr('placeholder', source[$element.data(self.identifier)]);
-    }
-    else
-    {
-        $element.html(source[$element.data(self.identifier)]);
-    }
-    
-}
-
-Gale.prototype._figureTranslationIndexType = function()
-{
-    var self = this;
-    
-    if(!self.isSourceIndexTypeFigured || !self.sourceIndexType)
-    {
-        var keysTotal = Object.keys(self.translationSource).length;
-        var keySum = 0;
-        var keyAvg = 0;
-
-        for(var key in self.translationSource)   
-        {
-            keySum += key.length;
-        }
-        
-        if(self.debug)
-        {
-            console.log('Total: ' + keysTotal);
-            console.log('Sum: ' + keySum);
-            console.log('Avg: ' + Math.ceil(keySum / keysTotal));
-        }
-        
-        if(Math.ceil(keySum / keysTotal) > 4)
-        {
-            self.sourceIndexType = 'normal';   
+                self.translationSourceLoaded = false;
+                throw new Error('Failed to load translation source from JSON: ' + status);
+            });
         }
         else
         {
-            self.sourceIndexType = 'shorthand';   
+            throw new Error('Could not determine translation source type');   
         }
         
-        self.isSourceIndexTypeFigured = true;
-        
-        return self.sourceIndexType;
+             
+    }
+}
+
+Gale.prototype._processSourceCallback = function(data, callback)
+{
+    var self = this;
+    
+    if(data && data.meta && data.translations)
+    {
+        self.translationRawSource = data;
+        self.translationMeta = data.meta;
+
+        if(!data.meta.availableLanguages)
+        {
+            throw new Error('Meta \'availableLanguages\' not found in translation source!');
+        }
+        else
+        {
+            if(self.debug)
+                console.log('Meta \'availableLanguages\' found for translation source');   
+
+            self.availableLanguages = data.meta.availableLanguages;
+            self.translationMeta.availableLanguagesCount = Object.keys(data.meta.availableLanguages).length;
+        }
+
+        self.translationSource = data.translations;
+        self.inverseTranslationSource = self._invertSource();
+        self.translationSourceLoaded = true;
+
+        callback.call(self);
     }
     else
     {
-        return self.sourceIndexType;
+        self.translationSourceLoaded = false;
+        throw new Error('Translation source cannot be null and / or it must include meta and data objects');   
     }
 }
 
-Gale.prototype._normalToShorthand = function(normal)
-{
-    var self = this;
-    
-    return self.availableLanguages[normal].shorthand || null; 
-}
 
-Gale.prototype._shorthandToNormal = function(shorthand)
+Gale.prototype._translateElement = function(element, language)
 {
     var self = this;
+    var source = self.translationSource[language];
+    var edata = element.getAttribute(self.identifier);
     
-    for(var key in self.availableLanguages)
+    if(typeof source[edata] === 'undefined' || !source[edata])
     {
-        if(self.availableLanguages[key].shorthand == shorthand)
+        console.log('\'' + language  + '\' Translation not found for id \'' + edata + '\'');
+    }
+    
+    if(element.nodeName === 'INPUT') // Detect if element is button of some sort
+    {
+        if(element.type == 'button' || element.type == 'submit')
         {
-            return key;
+            if(self.deepDebug)
+                console.log('Translated element = BUTTON INPUT');
+        
+            element.setAttribute('value', source[edata]);
+        }
+        else if(element.type == 'text' || element.type == 'password' || element.type == 'textarea' || element.type == 'textbox')
+        {
+            if(self.deepDebug)
+                console.log('Translated element = TEXT INPUT');
+        
+            element.setAttribute('placeholder', source[edata]);
+        }
+        else
+        {
+            if(self.deepDebug)
+                console.log('Translated element = NORMAL');
+            
+            element.innerHTML = source[edata];
         }
     }
-    
-    return null;
+    else
+    {
+        if(self.deepDebug)
+                console.log('Translated element = NORMAL');
+        
+        element.innerHTML = source[edata];
+    }
 }
 
 Gale.prototype._inElementCache = function(element)
@@ -474,7 +377,7 @@ Gale.prototype._inElementCache = function(element)
     
     for(var key in self.elementCache)
     {
-        if(self.elementCache[key].is(element))
+        if(self.elementCache[key] == element)
         {
             return true;   
         }
@@ -482,3 +385,70 @@ Gale.prototype._inElementCache = function(element)
     
     return false;
 }
+
+Gale.prototype._invertSource = function()
+{
+    var self = this;
+    var invertedSource = {};
+    
+    for(var key in self.translationSource)
+    {
+        var top = self.translationSource[key];
+        invertedSource[key] = {};
+        
+        var iTop = invertedSource[key];
+        
+        for(var key2 in top)
+        {
+            iTop[top[key2]] = key2;
+        }
+    }
+    
+    return invertedSource;
+}
+
+Gale.prototype._getJSON = function(url) 
+{
+    return new Promise(function(resolve, reject) 
+    {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'json';
+        xhr.overrideMimeType('application/json');
+        
+        xhr.onload = function() 
+        {
+            var status = xhr.status;
+            
+            if (status >= 200 && status < 400) 
+            {
+                resolve(xhr.response);
+            } 
+            else 
+            {
+                console.log(xhr);
+                reject(status);
+            }
+        };
+        xhr.send();
+    });
+};
+
+
+
+if (typeof module !== "undefined" && module.exports) // Node: Export function
+{
+    module.exports = Gale;
+}
+
+else if (typeof define === 'function' && define.amd) // AMD/requirejs: Define the module
+{
+    define(function () {return Gale;});
+}
+
+else // Browser: Expose to window
+{
+    window.Gale = Gale;
+}
+
+}());
