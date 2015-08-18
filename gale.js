@@ -47,7 +47,9 @@ Gale.prototype.translateApp = function(language, cacheonly)
 {
     var self = this;
     var wasTranslated = false;
-    cacheonly = cacheonly || true;
+    
+    if(typeof cacheonly === 'undefined')
+        var cacheonly = true;
     
     if(!self.translationSourceLoaded)
     {
@@ -270,13 +272,14 @@ Gale.prototype._processSource = function(source, callback)
         }
         else if(typeof source === 'string')
         {
-            $.getJSON(source, function(returndata)
+            self._getJSON(source).then(function(returndata)
             {
                 self._processSourceCallback(returndata, callback);
-            }).fail(function()
+            },
+            function(status)
             {
                 self.translationSourceLoaded = false;
-                throw new Error('Failed to load translation source from JSON');
+                throw new Error('Failed to load translation source from JSON: ' + status);
             });
         }
         else
@@ -403,6 +406,34 @@ Gale.prototype._invertSource = function()
     
     return invertedSource;
 }
+
+Gale.prototype._getJSON = function(url) 
+{
+    return new Promise(function(resolve, reject) 
+    {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'json';
+        xhr.overrideMimeType('application/json');
+        
+        xhr.onload = function() 
+        {
+            var status = xhr.status;
+            
+            if (status >= 200 && status < 400) 
+            {
+                resolve(xhr.response);
+            } 
+            else 
+            {
+                console.log(xhr);
+                reject(status);
+            }
+        };
+        xhr.send();
+    });
+};
+
 
 
 if (typeof module !== "undefined" && module.exports) // Node: Export function
