@@ -23,3 +23,7 @@ There is no decent lightweight client-side translation library made for hybrid m
 ## Demo
 
 [Here](http://ahvonenj.github.io/GaleJS/). 
+
+## License
+
+MIT
