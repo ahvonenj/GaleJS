@@ -27,3 +27,7 @@ As of 18.8.2015 GaleJS is jQuery free!
 ## Demo
 
 [Here](http://ahvonenj.github.io/GaleJS/). 
+
+## License
+
+MIT
