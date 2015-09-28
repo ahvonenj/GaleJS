@@ -21,7 +21,7 @@
     
     "translations":
     {
-        "fi":
+        "finnish":
         {
             "page_main_header": "Pääotsikko",
             "page_header_subtext": "Pääotsikon alateksti",
@@ -43,7 +43,7 @@
             "stresstest": "Stressitesti!"
         },
         
-        "en":
+        "english":
         {
             "page_main_header": "Main header",
             "page_header_subtext": "Subtext of main header",
@@ -65,7 +65,7 @@
             "stresstest": "A stress test!"
         },
         
-        "swe":
+        "swedish":
         {
             "page_main_header": "Sidhuvud",
             "page_header_subtext": "Undertext av sidhuvud",
@@ -84,7 +84,7 @@
             "td-li-1": "Listobjekt 1",
             "td-li-2": "Listobjekt 2",
             "td-li-3": "Listobjekt 3",
-            "stresstest": "Stresstest (Is this even swedish?)"
+            "stresstest": "Stresstest (Swe?)"
         }
     }
 }

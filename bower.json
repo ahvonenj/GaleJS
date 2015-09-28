@@ -1,0 +1,23 @@
+{
+  "name": "GaleJS",
+  "main": "gale.js",
+  "version": "0.0.1",
+  "homepage": "https://ahvonenj.github.io/GaleJS/",
+  "authors": [
+    "Jonah Ahvonen <jonah.ahvonen@gmail.com>"
+  ],
+  "description": "Lightweight client-side translation library",
+  "keywords": [
+    "translation",
+    "i18n"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "*",
+    "!gale.js"
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
