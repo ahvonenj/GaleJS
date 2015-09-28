@@ -14,7 +14,7 @@
   "license": "MIT",
   "ignore": [
     "*",
-    "!gale.js"
+    "!gale.js",
     "node_modules",
     "bower_components",
     "test",
