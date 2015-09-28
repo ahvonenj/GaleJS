@@ -18,8 +18,6 @@ There is no decent lightweight client-side translation library made for hybrid m
 
 As of 18.8.2015 GaleJS is jQuery free!
 
-![](https://github.com/ahvonenj/GaleJS/blob/strict-language-source/no_jquery.png?raw=true)
-
 ## How?
 
 [See here](https://github.com/ahvonenj/GaleJS/wiki/How-to-use-GaleJS)
